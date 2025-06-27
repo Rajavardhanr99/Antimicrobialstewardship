@@ -24,6 +24,10 @@
             --stewardship-color: #ff9500;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-main);
@@ -41,6 +45,9 @@
             transform: translateY(20px);
             pointer-events: none;
             position: absolute; /* Keep it out of flow when hidden */
+            width: 100%;
+            left: 0;
+            padding: 0 2rem; /* Match main container padding */
         }
 
         @keyframes fadeIn {
@@ -62,6 +69,7 @@
             max-width: 1200px;
             margin: auto;
             padding: 2rem;
+            position: relative;
         }
 
         .main-header h1 {
@@ -151,6 +159,16 @@
             box-shadow: 0 4px 15px rgba(0, 113, 227, 0.1);
             transform: translateY(-2px);
         }
+        
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        details > summary {
+            cursor: pointer;
+        }
 
         .feedback-card {
             padding: 1.5rem;
@@ -204,7 +222,7 @@
         .summary-section p { color: var(--text-secondary); margin-bottom: 0.5rem; }
         .summary-section ul { list-style-position: inside; padding-left: 1rem; margin-bottom: 1rem; color: var(--text-secondary);}
         .summary-section code { background-color: #e9e9eb; padding: 2px 6px; border-radius: 4px; font-family: Menlo, Monaco, Consolas, "Courier New", monospace;}
-
+        .summary-section a { color: var(--accent-primary); text-decoration: underline; }
 
     </style>
 </head>
@@ -279,7 +297,28 @@
     <script type="module">
         // --- DATA: SCENARIOS (Expanded) ---
         const scenarios = [
-            // Original scenarios 1-7
+            // Moved Challenge to the top for visibility
+            { id: 8, title: "Antibiogram Challenge", description: "A rapid-fire series of mini-cases to test your ability to interpret complex antibiograms, deduce resistance mechanisms, and select optimal therapy.", isChallenge: true, patient: { name: "Multiple Cases", age: "N/A", sex: "N/A", history: "N/A", presentation: "Select a case file to begin the challenge.", vitals: { temp: "N/A", hr: "N/A", bp: "N/A", rr: "N/A", spO2: "N/A" } }, initialActions: [{ text: "Begin Challenge", action: "startChallenge" }], stewardshipTip: "Each case in this challenge highlights a key principle of antibiogram interpretation. Paying attention to patterns, not just individual 'S' or 'R' results, is crucial for selecting effective and safe therapy.", references: ["CLSI M100 Performance Standards for Antimicrobial Susceptibility Testing."], 
+              cases: [ 
+                { caseId: '8-1', title: "Case 1: Simple Skin Infection", context: "34M with uncomplicated cellulitis.", organism: { name: "Staphylococcus aureus", source: "Wound" }, resistance: { phenotype: { "Oxacillin": "S", "Penicillin": "R", "Cefazolin": "S", "Clindamycin": "S", "TMP/SMX": "S" } }, interpretation: { question: "What is the correct classification of this organism?", choices: [ {id: "mrsa", text: "MRSA"}, {id: "mssa", text: "MSSA (Methicillin-Susceptible S. aureus)"}, {id: "vre", text: "VRE"} ], correct: "mssa", feedback: "Correct. Oxacillin susceptibility defines this as MSSA. Penicillin resistance is due to a simple penicillinase, which does not affect oxacillin or cephalosporins." }, therapy: { question: "What is the best oral therapy?", choices: [ { id: "vancomycin", text: "Vancomycin" }, { id: "dicloxacillin", text: "Dicloxacillin or Cephalexin" }, { id: "penicillin", text: "Penicillin" } ], correct: "dicloxacillin", feedback: "Correct. For MSSA, a penicillinase-stable penicillin (like dicloxacillin) or a first-generation cephalosporin (like cephalexin) is the drug of choice. Vancomycin is unnecessary." } }, 
+                { caseId: '8-2', title: "Case 2: Simple UTI", context: "28F with symptoms of cystitis.", organism: { name: "Escherichia coli", source: "Urine" }, resistance: { phenotype: { "Ampicillin": "R", "Ceftriaxone": "S", "Ciprofloxacin": "R", "Nitrofurantoin": "S", "TMP/SMX": "R" } }, interpretation: { question: "Based on local resistance patterns, what's a common issue seen here?", choices: [ {id: "carbapenem_resistance", text: "Carbapenem resistance"}, {id: "resistance_to_common_agents", text: "High rates of resistance to ampicillin, FQ, and TMP/SMX"}, {id: "esbl", text: "ESBL production"} ], correct: "resistance_to_common_agents", feedback: "Correct. This is a very common pattern for community E. coli, with widespread resistance to older oral agents." }, therapy: { question: "What is a good oral option?", choices: [ { id: "ciprofloxacin", text: "Ciprofloxacin" }, { id: "nitrofurantoin", text: "Nitrofurantoin" }, { id: "ampicillin", text: "Ampicillin" } ], correct: "nitrofurantoin", feedback: "Correct. Nitrofurantoin is an excellent choice for uncomplicated cystitis and this isolate is susceptible. Ciprofloxacin and Ampicillin are resistant." } }, 
+                { caseId: '8-3', title: "Case 3: Strep Throat", context: "15M with pharyngitis and fever.", organism: { name: "Streptococcus pyogenes (Group A)", source: "Throat Swab" }, resistance: { phenotype: { "Penicillin": "S", "Erythromycin": "R", "Clindamycin": "S" } }, interpretation: { question: "What is the most important susceptibility fact about S. pyogenes?", choices: [ {id: "vanc_resistance", text: "It is often resistant to vancomycin"}, {id: "universal_pen_s", text: "It is universally susceptible to penicillin"}, {id: "clinda_resistance", text: "It is always resistant to clindamycin"} ], correct: "universal_pen_s", feedback: "Correct. To date, penicillin resistance has never been documented in S. pyogenes. It remains the drug of choice. Macrolide resistance, however, is common." }, therapy: { question: "What is the drug of choice?", choices: [ { id: "erythromycin", text: "Erythromycin" }, { id: "penicillin_or_amoxicillin", text: "Penicillin or Amoxicillin" }, { id: "vancomycin", text: "Vancomycin" } ], correct: "penicillin_or_amoxicillin", feedback: "Correct. Penicillin (or amoxicillin for dosing convenience) is the definitive drug of choice for Group A Strep pharyngitis." } }, 
+                { caseId: '8-4', title: "Case 4: Pseudomonas in HAP", context: "67F with HAP.", organism: { name: "Pseudomonas aeruginosa", source: "Sputum" }, resistance: { phenotype: { "Piperacillin/Tazobactam": "R", "Ceftazidime": "R", "Cefepime": "S", "Aztreonam": "R", "Meropenem": "I", "Imipenem": "R", "Ciprofloxacin": "R", "Amikacin": "S", "Ceftolozane/Tazobactam": "S" } }, interpretation: { question: "What is the most likely mechanism?", choices: [ {id: "kpc", text: "KPC carbapenemase"}, {id: "ampc_combo", text: "AmpC hyperproduction + OprD porin loss"}, {id: "esbl", text: "ESBL + efflux pump"} ], correct: "ampc_combo", feedback: "Correct. Resistance to ceftazidime but susceptibility to cefepime is a classic sign of derepressed AmpC in Pseudomonas. Resistance to imipenem with intermediate meropenem points to OprD porin loss." }, therapy: { question: "What is the best therapy?", choices: [ { id: "cefepime", text: "Cefepime" }, { id: "ceftolozane_tazobactam", text: "Switch to Ceftolozane/Tazobactam" }, { id: "amikacin_colistin", text: "Switch to Amikacin + Colistin" } ], correct: "ceftolozane_tazobactam", feedback: "Correct. C/T is optimal as it's designed to overcome these mechanisms. Cefepime alone is risky due to high bacterial load in pneumonia (inoculum effect)." } }, 
+                { caseId: '8-5', title: "Case 5: E. faecium in Blood", context: "75M with CLABSI.", organism: { name: "Enterococcus faecium", source: "Blood" }, resistance: { phenotype: { "Ampicillin": "R", "Penicillin": "R", "Vancomycin": "R", "Linezolid": "S", "Daptomycin": "S", "Ciprofloxacin": "R" } }, interpretation: { question: "What is the key phenotype?", choices: [ {id: "mrsa", text: "MRSA"}, {id: "vre", text: "Vancomycin-Resistant Enterococcus (VRE)"}, {id: "cre", text: "CRE"} ], correct: "vre", feedback: "Correct. This is VRE. Ampicillin resistance is also typical for E. faecium." }, therapy: { question: "What is the best therapy?", choices: [ { id: "vancomycin", text: "High-dose Vancomycin" }, { id: "ampicillin_sulbactam", text: "Ampicillin/Sulbactam" }, { id: "linezolid", text: "Linezolid" } ], correct: "linezolid", feedback: "Correct. Linezolid or Daptomycin are first-line for VRE bacteremia." } },
+                { caseId: '8-6', title: "Case 6: Ventilator Pneumonia", context: "58F in ICU on ventilator.", organism: { name: "Stenotrophomonas maltophilia", source: "BAL" }, resistance: { phenotype: { "Ceftazidime": "S", "Levofloxacin": "S", "Minocycline": "S", "TMP/SMX": "S", "Meropenem": "R" } }, interpretation: { question: "What is a key intrinsic resistance for this organism?", choices: [ {id: "vanc_resistance", text: "Vancomycin resistance"}, {id: "carbapenem_resistance", text: "Carbapenem resistance"}, {id: "fq_resistance", text: "Fluoroquinolone resistance"} ], correct: "carbapenem_resistance", feedback: "Correct. Stenotrophomonas is intrinsically resistant to all carbapenems due to metallo-beta-lactamases (L1) and efflux pumps." }, therapy: { question: "What is the drug of choice?", choices: [ { id: "meropenem", text: "Meropenem" }, { id: "levofloxacin", text: "Levofloxacin" }, { id: "tmp_smx", text: "Trimethoprim-Sulfamethoxazole" } ], correct: "tmp_smx", feedback: "Correct. TMP-SMX is the drug of choice for Stenotrophomonas infections. Levofloxacin is an alternative but resistance can be an issue." } },
+                { caseId: '8-7', title: "Case 7: Endocarditis", context: "66M with native valve endocarditis.", organism: { name: "Enterococcus faecalis", source: "Blood" }, resistance: { phenotype: { "Ampicillin": "S", "Penicillin": "S", "Vancomycin": "S", "Linezolid": "S", "Gentamicin (HLAR)": "S" } }, interpretation: { question: "How does this differ from typical E. faecium?", choices: [ {id: "vanc_s", text: "It is susceptible to Vancomycin"}, {id: "amp_s", text: "It is susceptible to Ampicillin"}, {id: "linezolid_r", text: "It is resistant to Linezolid"} ], correct: "amp_s", feedback: "Correct. Unlike E. faecium, E. faecalis is typically susceptible to ampicillin, making it a preferred agent." }, therapy: { question: "What is the standard therapy?", choices: [ { id: "vancomycin", text: "Vancomycin" }, { id: "ampicillin_ceftriaxone", text: "Ampicillin + Ceftriaxone" }, { id: "daptomycin", text: "Daptomycin" } ], correct: "ampicillin_ceftriaxone", feedback: "Correct. Ampicillin + Ceftriaxone is the standard of care for serious E. faecalis infections like endocarditis, providing dual beta-lactam synergy. Vancomycin is an alternative but less preferred." } },
+                { caseId: '8-8', title: "Case 8: The D-Test", context: "45F with cellulitis, allergic to penicillin.", organism: { name: "Staphylococcus aureus", source: "Wound" }, resistance: { phenotype: { "Oxacillin": "R", "Erythromycin": "R", "Clindamycin": "S (D-test positive)", "Vancomycin": "S" } }, interpretation: { question: "What is the significance of a positive D-test?", choices: [ {id: "confirms_clinda_s", text: "It confirms clindamycin will work"}, {id: "inducible_resistance", text: "It indicates inducible clindamycin resistance"}, {id: "mrsa_confirm", text: "It confirms the isolate is MRSA"} ], correct: "inducible_resistance", feedback: "Correct. A positive D-test means the erm gene is present, which can cause resistance to clindamycin during therapy despite appearing susceptible in vitro." }, therapy: { question: "What is the best oral therapy?", choices: [ { id: "clindamycin", text: "Clindamycin" }, { id: "vancomycin_iv", text: "Admit for IV Vancomycin" }, { id: "doxycycline_or_tmp_smx", text: "Doxycycline or TMP/SMX" } ], correct: "doxycycline_or_tmp_smx", feedback: "Correct. Because of the positive D-test, clindamycin should not be used. Other oral MRSA agents like doxycycline or TMP/SMX are appropriate." } },
+                { caseId: '8-9', title: "Case 9: CRE from Urine", context: "78M transferred from a nursing home.", organism: { name: "Klebsiella pneumoniae", source: "Urine" }, resistance: { phenotype: { "Ceftriaxone": "R", "Ertapenem": "R", "Meropenem": "R", "Ceftazidime/Avibactam": "S", "Meropenem/Vaborbactam": "R", "Amikacin": "S" } }, interpretation: { question: "This pattern is most consistent with which carbapenemase?", choices: [ {id: "kpc", text: "KPC"}, {id: "ndm", text: "NDM (Metallo-beta-lactamase)"}, {id: "oxa48", text: "OXA-48-like"} ], correct: "oxa48", feedback: "Correct. OXA-48 enzymes are inhibited well by avibactam, but not vaborbactam. They also often have lower-level resistance to meropenem than KPC or NDM, but this isolate is fully resistant." }, therapy: { question: "If this patient developed sepsis, what would be the best IV option?", choices: [ { id: "meropenem_vaborbactam", text: "Meropenem/Vaborbactam" }, { id: "ceftazidime_avibactam", text: "Ceftazidime/Avibactam" }, { id: "meropenem", text: "High-dose Meropenem" } ], correct: "ceftazidime_avibactam", feedback: "Correct. Ceftazidime/Avibactam is the most reliable agent for treating infections caused by OXA-48-producing organisms." } },
+                { caseId: '8-10', title: "Case 10: ESBL Bacteremia", context: "55M with urosepsis.", organism: { name: "Escherichia coli", source: "Blood" }, resistance: { phenotype: { "Ceftriaxone": "R", "Ciprofloxacin": "R", "Piperacillin/Tazobactam": "S", "Meropenem": "S" } }, interpretation: { question: "What is the phenotype?", choices: [ {id: "cre", text: "Carbapenem-Resistant Enterobacterales (CRE)"}, {id: "esbl", text: "Extended-Spectrum Beta-Lactamase (ESBL)"}, {id: "ampc", text: "AmpC"} ], correct: "esbl", feedback: "Correct. Resistance to ceftriaxone with susceptibility to carbapenems is the classic ESBL phenotype." }, therapy: { question: "What is the most appropriate therapy for this serious infection?", choices: [ { id: "piperacillin_tazobactam", text: "Piperacillin-Tazobactam" }, { id: "ciprofloxacin", text: "Ciprofloxacin" }, { id: "meropenem", text: "Meropenem" } ], correct: "meropenem", feedback: "Correct. For serious infections like bacteremia caused by ESBL-producers, carbapenems are the drugs of choice. Piperacillin-tazobactam may fail due to the inoculum effect, even if it tests susceptible." } },
+                { caseId: '8-11', title: "Case 11: BLNAR H. influenzae", context: "2y child with recurrent ear infections.", organism: { name: "Haemophilus influenzae", source: "Middle Ear Fluid" }, resistance: { phenotype: { "Ampicillin": "R", "Amoxicillin/Clavulanate": "S", "Ceftriaxone": "S", "Beta-lactamase Test": "Negative" } }, interpretation: { question: "What mechanism explains this antibiogram?", choices: [ {id: "penicillinase", text: "Production of a penicillinase"}, {id: "blnar", text: "BLNAR (Beta-lactamase-negative, ampicillin-resistant)"}, {id: "esbl", text: "ESBL production"} ], correct: "blnar", feedback: "Correct. The negative beta-lactamase test but resistance to ampicillin indicates resistance is due to modifications in penicillin-binding proteins (PBPs), the definition of BLNAR." }, therapy: { question: "What is the best oral option?", choices: [ { id: "amoxicillin", text: "High-dose Amoxicillin" }, { id: "amoxicillin_clavulanate", text: "Amoxicillin/Clavulanate" }, { id: "azithromycin", text: "Azithromycin" } ], correct: "amoxicillin_clavulanate", feedback: "Correct. Amoxicillin/Clavulanate is an appropriate choice. High-dose amoxicillin is often used to overcome the PBP modifications in BLNAR strains, but Amox/Clav is also very effective." } },
+                { caseId: '8-12', title: "Case 12: VRE Bacteriuria", context: "80F in nursing home with a catheter.", organism: { name: "Enterococcus faecalis", source: "Urine" }, resistance: { phenotype: { "Ampicillin": "R", "Vancomycin": "R", "Linezolid": "S", "Nitrofurantoin": "S", "Daptomycin": "S" } }, interpretation: { question: "What is the correct classification?", choices: [ {id: "vre_faecium", text: "VRE, E. faecium"}, {id: "mssa", text: "MSSA"}, {id: "vre_faecalis", text: "VRE, E. faecalis"} ], correct: "vre_faecalis", feedback: "Correct. This is Vancomycin-Resistant E. faecalis. It's less common than VRE E. faecium, but notable for the ampicillin resistance, which is acquired in this species." }, therapy: { question: "If treatment for symptomatic UTI is required, what's a good oral option?", choices: [ { id: "linezolid", text: "Linezolid" }, { id: "nitrofurantoin", text: "Nitrofurantoin" }, { id: "ampicillin", text: "Ampicillin" } ], correct: "nitrofurantoin", feedback: "Correct. For a VRE cystitis, oral options like Nitrofurantoin or Fosfomycin are excellent choices if susceptible, sparing broader agents like Linezolid." } },
+                { caseId: '8-13', title: "Case 13: The AmpC Trap, revisited", context: "62M with hospital-acquired pneumonia.", organism: { name: "Serratia marcescens", source: "Sputum" }, resistance: { phenotype: { "Ceftriaxone": "S", "Cefepime": "S", "Meropenem": "S", "Ciprofloxacin": "S" } }, interpretation: { question: "What is the major therapeutic concern with this organism?", choices: [ {id: "intrinsic_resistance", text: "Intrinsic carbapenem resistance"}, {id: "inducible_ampc", text: "Inducible AmpC beta-lactamase"}, {id: "esbl_risk", text: "High risk of being an ESBL-producer"} ], correct: "inducible_ampc", feedback: "Correct. Serratia is a 'SPICE-M' organism. Using ceftriaxone can lead to derepression of the AmpC enzyme and clinical failure, even though it reports susceptible." }, therapy: { question: "What is the most reliable therapy?", choices: [ { id: "ceftriaxone", text: "Ceftriaxone" }, { id: "cefepime", text: "Cefepime" }, { id: "azithromycin", text: "Azithromycin" } ], correct: "cefepime", feedback: "Correct. Cefepime is more stable to the AmpC enzyme than third-generation cephalosporins and is a preferred agent for serious infections with these organisms." } },
+                { caseId: '8-14', title: "Case 14: MDR Acinetobacter", context: "45M with a traumatic wound infection from overseas.", organism: { name: "Acinetobacter baumannii", source: "Wound" }, resistance: { phenotype: { "Cefepime": "R", "Piperacillin/Tazobactam": "R", "Meropenem": "S", "Ciprofloxacin": "R", "Ampicillin/Sulbactam": "S" } }, interpretation: { question: "What is notable about this isolate?", choices: [ {id: "crab", text: "It is CRAB (Carbapenem-Resistant)"}, {id: "mdr_non_crab", text: "It is MDR but NOT carbapenem-resistant"}, {id: "pan_susceptible", text: "It is pan-susceptible"} ], correct: "mdr_non_crab", feedback: "Correct. While resistant to many agents, it has preserved susceptibility to carbapenems and ampicillin/sulbactam." }, therapy: { question: "What would be a good treatment choice?", choices: [ { id: "colistin", text: "Colistin" }, { id: "meropenem", text: "Meropenem" }, { id: "ceftriaxone", text: "Ceftriaxone" } ], correct: "meropenem", feedback: "Correct. Since it's susceptible, a carbapenem like meropenem is an excellent choice. High-dose ampicillin/sulbactam is also a reasonable option." } },
+                { caseId: '8-15', title: "Case 15: Bacterial Meningitis", context: "25F with fever, headache, nuchal rigidity.", organism: { name: "Streptococcus pneumoniae", source: "CSF" }, resistance: { phenotype: { "Penicillin": "R", "Ceftriaxone": "S", "Vancomycin": "S", "Levofloxacin": "S" } }, interpretation: { question: "What is the significance of penicillin resistance in this context?", choices: [ {id: "ceftriaxone_failure", text: "It means ceftriaxone will also fail"}, {id: "vanc_needed", text: "It necessitates adding vancomycin to empiric therapy"}, {id: "no_significance", text: "It has no clinical significance"} ], correct: "vanc_needed", feedback: "Correct. The rise of penicillin-resistant S. pneumoniae is why empiric therapy for bacterial meningitis must include Vancomycin in addition to a third-generation cephalosporin." }, therapy: { question: "What is the standard definitive therapy for this isolate?", choices: [ { id: "penicillin", text: "High-dose Penicillin" }, { id: "ceftriaxone", text: "Ceftriaxone" }, { id: "vancomycin", text: "Vancomycin alone" } ], correct: "ceftriaxone", feedback: "Correct. Since the isolate is susceptible to ceftriaxone, vancomycin can be discontinued and therapy can be streamlined to ceftriaxone alone." } },
+                { caseId: '8-16', title: "Case 16: The VISA Problem", context: "59M with diabetic foot osteomyelitis, failing vancomycin.", organism: { name: "Staphylococcus aureus", source: "Bone Biopsy" }, resistance: { phenotype: { "Oxacillin": "R", "Vancomycin": "S (MIC=2)", "Daptomycin": "S", "Linezolid": "S" } }, interpretation: { question: "What does a Vancomycin MIC of 2 signify in a serious MRSA infection?", choices: [ {id: "excellent_susceptibility", text: "Excellent susceptibility, continue vancomycin"}, {id: "mic_creep", text: "Possible 'MIC creep' associated with treatment failure"}, {id: "vrsa", text: "This is VRSA (Vancomycin-Resistant S. aureus)"} ], correct: "mic_creep", feedback: "Correct. This is Vancomycin-Intermediate S. aureus (VISA) or heteroresistant VISA (hVISA). Vancomycin MICs at the higher end of susceptible are associated with a higher risk of clinical failure in deep-seated infections." }, therapy: { question: "What is a better therapeutic option?", choices: [ { id: "vancomycin", text: "Continue Vancomycin at a higher dose" }, { id: "daptomycin", text: "Switch to Daptomycin" }, { id: "clindamycin", text: "Switch to Clindamycin" } ], correct: "daptomycin", feedback: "Correct. For serious MRSA infections with a high vancomycin MIC, switching to an alternative agent like Daptomycin or Linezolid is recommended." } },
+                { caseId: '8-17', title: "Case 17: Daptomycin Resistance", context: "72M with VRE bacteremia on daptomycin, still has positive blood cultures.", organism: { name: "Enterococcus faecium", source: "Blood" }, resistance: { phenotype: { "Ampicillin": "R", "Vancomycin": "R", "Linezolid": "S", "Daptomycin": "R (MIC=8)" } }, interpretation: { question: "What is the likely mechanism of daptomycin resistance here?", choices: [ {id: "target_mod", text: "Target modification (PBP)"}, {id: "enzyme", text: "Enzymatic degradation of daptomycin"}, {id: "repulsion", text: "Electrostatic repulsion due to changes in the cell surface charge"} ], correct: "repulsion", feedback: "Correct. A primary mechanism of daptomycin resistance in Enterococcus is the alteration of cell membrane phospholipids, which leads to electrostatic repulsion of the positively charged daptomycin molecule." }, therapy: { question: "What is the next best therapeutic step?", choices: [ { id: "high_dose_dapto", text: "Increase the daptomycin dose" }, { id: "linezolid", text: "Switch to Linezolid" }, { id: "add_gentamicin", text: "Add Gentamicin to daptomycin" } ], correct: "linezolid", feedback: "Correct. With daptomycin resistance confirmed, the best course of action is to switch to the alternative first-line agent for VRE, which is Linezolid." } },
+                { caseId: '8-18', title: "Case 18: Penicillin-Resistant Pneumococcus", context: "68M with community-acquired pneumonia.", organism: { name: "Streptococcus pneumoniae", source: "Sputum" }, resistance: { phenotype: { "Penicillin": "R (MIC=4)", "Ceftriaxone": "S", "Levofloxacin": "S" } }, interpretation: { question: "What is the mechanism of penicillin resistance in S. pneumoniae?", choices: [ {id: "beta_lactamase", text: "Production of a beta-lactamase"}, {id: "mosaic_pbp", text: "Alteration of the target PBP, creating a 'mosaic PBP'"}, {id: "efflux", text: "An efflux pump that removes penicillin"} ], correct: "mosaic_pbp", feedback: "Correct. S. pneumoniae acquires DNA from other bacteria, inserting it into its own PBP genes. This creates a mosaic PBP with lower affinity for penicillin, leading to resistance." }, therapy: { question: "What is the most appropriate treatment?", choices: [ { id: "penicillin", text: "High-dose Penicillin" }, { id: "ceftriaxone", text: "Ceftriaxone" }, { id: "vancomycin", text: "Vancomycin" } ], correct: "ceftriaxone", feedback: "Correct. The key is that the isolate is still susceptible to ceftriaxone. Based on established breakpoints, ceftriaxone is an excellent choice for non-meningitis infections caused by penicillin-resistant pneumococci." } }
+            ]},
             { id: 1, title: "ESBL Cystitis", description: "A common community-acquired infection complicated by an important resistance mechanism.", patient: { name: "Mrs. Gable", age: 68, sex: "Female", history: "Hypertension, Type 2 Diabetes, recurrent UTIs.", presentation: "Presents to the clinic with a 3-day history of dysuria, urinary frequency, and suprapubic pain. She is afebrile and hemodynamically stable.", vitals: { temp: "37.1°C", hr: "88 bpm", bp: "130/75 mmHg", rr: "16/min", spO2: "98% on RA" } }, organism: { name: "Escherichia coli", source: "Urine Culture" }, resistance: { mechanism: "ESBL (CTX-M-15)", phenotype: { "Amikacin": "S", "Ampicillin": "R", "Cefazolin": "R", "Ceftriaxone": "R", "Ciprofloxacin": "R", "Ertapenem": "S", "Meropenem": "S", "Nitrofurantoin": "S", "Piperacillin/Tazobactam": "R", "TMP/SMX": "R" } }, initialActions: [{ text: "Send Urinalysis & Urine Culture, Start Empiric Antibiotics", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "ceftriaxone", text: "Ceftriaxone" }, { id: "ciprofloxacin", text: "Ciprofloxacin" }, { id: "nitrofurantoin", text: "Nitrofurantoin" }, { id: "ertapenem", text: "Ertapenem" }], definitiveChoices: [{ id: "ceftriaxone", text: "Continue Ceftriaxone" }, { id: "ertapenem", text: "Switch to Ertapenem" }, { id: "piperacillin_tazobactam", text: "Switch to Piperacillin-Tazobactam" }, { id: "nitrofurantoin", text: "Switch to Nitrofurantoin" }], correctPath: { empiric: "nitrofurantoin", definitive: "nitrofurantoin" }, stewardshipTip: "For uncomplicated cystitis, oral agents like nitrofurantoin or fosfomycin are preferred to spare broader-spectrum agents like carbapenems, even if the organism is ESBL-producing and susceptible.", references: [] },
             { id: 2, title: "KPC Klebsiella Sepsis", description: "A critically ill ICU patient with a severe hospital-acquired infection caused by a Carbapenem-Resistant Enterobacteriaceae (CRE).", patient: { name: "Mr. Chen", age: 72, sex: "Male", history: "COPD, recent abdominal surgery 10 days ago.", presentation: "Admitted to the ICU 5 days ago. Now develops fever, hypotension, and increased oxygen requirement. He is on a mechanical ventilator.", vitals: { temp: "39.2°C", hr: "125 bpm", bp: "88/50 mmHg", rr: "22/min (on ventilator)", spO2: "91% on 60% FiO2" } }, organism: { name: "Klebsiella pneumoniae", source: "Blood Culture & Endotracheal Aspirate" }, resistance: { mechanism: "KPC (Klebsiella pneumoniae carbapenemase)", phenotype: { "Amikacin": "I", "Ceftazidime": "R", "Ceftazidime/Avibactam": "S", "Cefepime": "R", "Ciprofloxacin": "R", "Colistin": "S", "Ertapenem": "R", "Meropenem": "R (MIC > 8)", "Meropenem/Vaborbactam": "S", "Tigecycline": "S" } }, initialActions: [{ text: "Draw Blood Cultures & Start Empiric Antibiotics for Hospital-Acquired Sepsis", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "piperacillin_tazobactam", text: "Piperacillin-Tazobactam + Vancomycin" }, { id: "meropenem", text: "Meropenem + Vancomycin" }, { id: "cefepime", text: "Cefepime + Vancomycin" }], definitiveChoices: [{ id: "meropenem_high_dose", text: "Continue Meropenem (use high-dose, extended infusion)" }, { id: "colistin_meropenem", text: "Switch to Colistin + Meropenem" }, { id: "ceftazidime_avibactam", text: "Switch to Ceftazidime-Avibactam" }, { id: "tigecycline", text: "Switch to Tigecycline" }], correctPath: { empiric: "meropenem", definitive: "ceftazidime_avibactam" }, stewardshipTip: "Once a specific carbapenemase is identified, therapy should be targeted. Novel BL/BLIs are now preferred over older, more toxic regimens like colistin-based therapy for KPC producers.", references: [] },
             { id: 3, title: "The NDM-1 Challenge", description: "An extremely resistant organism requiring advanced knowledge of resistance mechanisms and combination therapy.", patient: { name: "Mr. Singh", age: 55, sex: "Male", history: "Patient transferred from a hospital overseas after a complicated surgery.", presentation: "Develops septic shock 3 days after arrival. Requires vasopressors to maintain blood pressure.", vitals: { temp: "38.9°C", hr: "130 bpm", bp: "85/45 mmHg (on norepinephrine)", rr: "28/min", spO2: "92% on NRM" } }, organism: { name: "Enterobacter cloacae", source: "Blood Culture (2/2 sets)" }, resistance: { mechanism: "NDM-1", phenotype: { "Amikacin": "R", "Aztreonam": "S", "Ceftazidime/Avibactam": "R", "Cefiderocol": "S", "Colistin": "S", "Meropenem": "R", "Meropenem/Vaborbactam": "R", "Imipenem/Relebactam": "R", "Tigecycline": "I" } }, initialActions: [{ text: "Draw Blood Cultures & Start Broad-Spectrum Empiric Antibiotics", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "meropenem_colistin", text: "Meropenem + Colistin" }], definitiveChoices: [{ id: "ceftazidime_avibactam_alone", text: "Switch to Ceftazidime-Avibactam" }, { id: "cefiderocol", text: "Switch to Cefiderocol" }, { id: "ceftazidime_avibactam_aztreonam", text: "Switch to Ceftazidime-Avibactam + Aztreonam" }, { id: "colistin_tigecycline", text: "Switch to Colistin + Tigecycline" }], correctPath: { empiric: "meropenem_colistin", definitive: ["cefiderocol", "ceftazidime_avibactam_aztreonam"] }, stewardshipTip: "Metallo-β-lactamases (MBLs) like NDM-1 hydrolyze nearly all β-lactams except aztreonam. They are not inhibited by avibactam, vaborbactam, or relebactam. This requires specialized therapy.", references: [] },
@@ -287,11 +326,10 @@
             { id: 5, title: "CRAB Septic Shock", description: "A fulminant infection with Carbapenem-Resistant Acinetobacter baumannii (CRAB).", patient: { name: "Ms. Davis", age: 65, sex: "Female", history: "ICU patient for 3 weeks post-cardiac surgery, on a ventilator.", presentation: "Rapidly develops septic shock. Requires high-dose vasopressors.", vitals: { temp: "40.1°C", hr: "140 bpm", bp: "75/40 mmHg (on pressors)", rr: "25/min (vent)", spO2: "89% on 100% FiO2" } }, organism: { name: "Acinetobacter baumannii complex", source: "Blood Culture & BAL" }, resistance: { mechanism: "OXA-23 Carbapenemase, Efflux pumps", phenotype: { "Amikacin": "R", "Cefepime": "R", "Ceftazidime/Avibactam": "R", "Ciprofloxacin": "R", "Colistin": "S", "Meropenem": "R", "Minocycline": "S", "Piperacillin/Tazobactam": "R", "Tigecycline": "I", "TMP/SMX": "R" } }, initialActions: [{ text: "Patient is in shock. Initiate immediate empiric therapy.", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "meropenem_vanc", text: "Meropenem + Vancomycin" }, { id: "meropenem_colistin_vanc", text: "Meropenem + Colistin + Vancomycin" }, { id: "pip_tazo_vanc", text: "Piperacillin-Tazobactam + Vancomycin" }], definitiveChoices: [{ id: "colistin_meropenem", text: "Combination therapy with Colistin + Meropenem" }, { id: "colistin_alone", text: "Monotherapy with Colistin" }, { id: "minocycline", text: "Monotherapy with Minocycline" }], correctPath: { empiric: "meropenem_colistin_vanc", definitive: "colistin_meropenem" }, stewardshipTip: "In patients with septic shock and high risk for CRAB, empiric therapy should be extremely broad. For definitive therapy of severe CRAB infections, combination therapy is often used for potential synergy.", references: [] },
             { id: 6, title: "The Fungal Invader", description: "An ICU patient on multiple antibiotics develops a new fever, raising suspicion for a non-bacterial cause.", patient: { name: "Mr. Rodriguez", age: 78, sex: "Male", history: "Post-op for perforated diverticulitis, has a central line, TPN, and on Meropenem + Vancomycin for 10 days.", presentation: "Develops a new, persistent fever not responding to broad-spectrum antibiotics.", vitals: { temp: "38.8°C", hr: "110 bpm", bp: "115/70 mmHg", rr: "18/min", spO2: "95% on RA" } }, organism: { name: "Candida auris", source: "Blood Culture" }, resistance: { mechanism: "Fungal resistance", phenotype: { "Amphotericin B": "S", "Anidulafungin": "S", "Fluconazole": "R", "Micafungin": "S", "Voriconazole": "R" } }, initialActions: [{ text: "Patient has risk factors for fungal infection. Broaden coverage.", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "fluconazole", text: "Start Fluconazole" }, { id: "anidulafungin", text: "Start Anidulafungin (an echinocandin)" }, { id: "voriconazole", text: "Start Voriconazole" }, { id: "do_nothing", text: "Continue current antibiotics and observe" }], definitiveChoices: [{ id: "continue_anidulafungin", text: "Continue Anidulafungin" }, { id: "switch_fluconazole", text: "Switch to Fluconazole" }, { id: "switch_amphotericin", text: "Switch to Amphotericin B" }], correctPath: { empiric: "anidulafungin", definitive: "continue_anidulafungin" }, stewardshipTip: "In critically ill patients with risk for invasive candidiasis, empiric therapy with an echinocandin is preferred due to rising fluconazole resistance. C. auris is a multidrug-resistant threat requiring strict infection control.", references: [] },
             { id: 7, title: "The AmpC Trap", description: "A lesson in why some susceptibility results can be misleading in vivo.", patient: { name: "Mr. Lee", age: 60, sex: "Male", history: "Hospitalized for pneumonia, treated with ceftriaxone.", presentation: "Initially improved, but on day 4 of therapy, his fever returns and oxygen requirements increase.", vitals: { temp: "38.5°C", hr: "105 bpm", bp: "130/85 mmHg", rr: "22/min", spO2: "93% on 4L NC" } }, organism: { name: "Enterobacter cloacae", source: "Sputum Culture" }, resistance: { mechanism: "Inducible AmpC β-lactamase", phenotype: { "Cefepime": "S", "Ceftriaxone": "S", "Ciprofloxacin": "S", "Ertapenem": "S", "Gentamicin": "S", "Meropenem": "S", "Piperacillin/Tazobactam": "S" } }, initialActions: [{ text: "Initial cultures sent. Start empiric therapy for HAP.", action: "startEmpiricTherapy" }], empiricChoices: [], definitiveChoices: [{ id: "continue_ceftriaxone", text: "Continue Ceftriaxone; the report says it's susceptible." }, { id: "switch_cefepime", text: "Switch to Cefepime" }, { id: "switch_meropenem", text: "Switch to Meropenem" }], correctPath: { empiric: "cefepime", definitive: "switch_cefepime" }, stewardshipTip: "Enterobacter, Serratia, and Citrobacter (ESC) carry a chromosomal AmpC gene. Exposure to third-generation cephalosporins (e.g., ceftriaxone) can select for mutants that overproduce this enzyme, leading to clinical failure despite an initial 'S' on the report. Cefepime is more stable.", references: [] },
-            { id: 8, title: "Antibiogram Challenge", description: "A rapid-fire series of mini-cases to test your ability to interpret complex antibiograms, deduce resistance mechanisms, and select optimal therapy.", isChallenge: true, patient: { name: "Multiple Cases", age: "N/A", sex: "N/A", history: "N/A", presentation: "Select a case file to begin the challenge.", vitals: { temp: "N/A", hr: "N/A", bp: "N/A", rr: "N/A", spO2: "N/A" } }, initialActions: [{ text: "Begin Challenge", action: "startChallenge" }], stewardshipTip: "Each case in this challenge highlights a key principle of antibiogram interpretation. Paying attention to patterns, not just individual 'S' or 'R' results, is crucial for selecting effective and safe therapy.", references: ["CLSI M100 Performance Standards for Antimicrobial Susceptibility Testing."], cases: [ { caseId: '8-11', title: "Basic Case 1: Simple Skin Infection", context: "34M with uncomplicated cellulitis.", organism: { name: "Staphylococcus aureus", source: "Wound" }, resistance: { phenotype: { "Oxacillin": "S", "Penicillin": "R", "Cefazolin": "S", "Clindamycin": "S", "TMP/SMX": "S" } }, interpretation: { question: "What is the correct classification of this organism?", choices: [ {id: "mrsa", text: "MRSA"}, {id: "mssa", text: "MSSA (Methicillin-Susceptible S. aureus)"}, {id: "vre", text: "VRE"} ], correct: "mssa", feedback: "Correct. Oxacillin susceptibility defines this as MSSA. Penicillin resistance is due to a simple penicillinase, which does not affect oxacillin or cephalosporins." }, therapy: { question: "What is the best oral therapy?", choices: [ { id: "vancomycin", text: "Vancomycin" }, { id: "dicloxacillin", text: "Dicloxacillin or Cephalexin" }, { id: "penicillin", text: "Penicillin" } ], correct: "dicloxacillin", feedback: "Correct. For MSSA, a penicillinase-stable penicillin (like dicloxacillin) or a first-generation cephalosporin (like cephalexin) is the drug of choice. Vancomycin is unnecessary." } }, { caseId: '8-12', title: "Basic Case 2: Simple UTI", context: "28F with symptoms of cystitis.", organism: { name: "Escherichia coli", source: "Urine" }, resistance: { phenotype: { "Ampicillin": "R", "Ceftriaxone": "S", "Ciprofloxacin": "R", "Nitrofurantoin": "S", "TMP/SMX": "R" } }, interpretation: { question: "Based on local resistance patterns, what's a common issue seen here?", choices: [ {id: "carbapenem_resistance", text: "Carbapenem resistance"}, {id: "resistance_to_common_agents", text: "High rates of resistance to ampicillin, FQ, and TMP/SMX"}, {id: "esbl", text: "ESBL production"} ], correct: "resistance_to_common_agents", feedback: "Correct. This is a very common pattern for community E. coli, with widespread resistance to older oral agents." }, therapy: { question: "What is a good oral option?", choices: [ { id: "ciprofloxacin", text: "Ciprofloxacin" }, { id: "nitrofurantoin", text: "Nitrofurantoin" }, { id: "ampicillin", text: "Ampicillin" } ], correct: "nitrofurantoin", feedback: "Correct. Nitrofurantoin is an excellent choice for uncomplicated cystitis and this isolate is susceptible. Ciprofloxacin and Ampicillin are resistant." } }, { caseId: '8-13', title: "Basic Case 3: Strep Throat", context: "15M with pharyngitis and fever.", organism: { name: "Streptococcus pyogenes (Group A)", source: "Throat Swab" }, resistance: { phenotype: { "Penicillin": "S", "Erythromycin": "R", "Clindamycin": "S" } }, interpretation: { question: "What is the most important susceptibility fact about S. pyogenes?", choices: [ {id: "vanc_resistance", text: "It is often resistant to vancomycin"}, {id: "universal_pen_s", text: "It is universally susceptible to penicillin"}, {id: "clinda_resistance", text: "It is always resistant to clindamycin"} ], correct: "universal_pen_s", feedback: "Correct. To date, penicillin resistance has never been documented in S. pyogenes. It remains the drug of choice. Macrolide resistance, however, is common." }, therapy: { question: "What is the drug of choice?", choices: [ { id: "erythromycin", text: "Erythromycin" }, { id: "penicillin_or_amoxicillin", text: "Penicillin or Amoxicillin" }, { id: "vancomycin", text: "Vancomycin" } ], correct: "penicillin_or_amoxicillin", feedback: "Correct. Penicillin (or amoxicillin for dosing convenience) is the definitive drug of choice for Group A Strep pharyngitis." } }, { caseId: '8-1', title: "Case 1: Pseudomonas in HAP", context: "67F with HAP.", organism: { name: "Pseudomonas aeruginosa", source: "Sputum" }, resistance: { phenotype: { "Piperacillin/Tazobactam": "R", "Ceftazidime": "R", "Cefepime": "S", "Aztreonam": "R", "Meropenem": "I", "Imipenem": "R", "Ciprofloxacin": "R", "Amikacin": "S", "Ceftolozane/Tazobactam": "S" } }, interpretation: { question: "What is the most likely mechanism?", choices: [ {id: "kpc", text: "KPC carbapenemase"}, {id: "ampc_combo", text: "AmpC hyperproduction + OprD porin loss"}, {id: "esbl", text: "ESBL + efflux pump"} ], correct: "ampc_combo", feedback: "Correct. Resistance to ceftazidime but susceptibility to cefepime is a classic sign of derepressed AmpC in Pseudomonas. Resistance to imipenem with intermediate meropenem points to OprD porin loss." }, therapy: { question: "What is the best therapy?", choices: [ { id: "cefepime", text: "Continue Cefepime" }, { id: "ceftolozane_tazobactam", text: "Switch to Ceftolozane/Tazobactam" }, { id: "amikacin_colistin", text: "Switch to Amikacin + Colistin" } ], correct: "ceftolozane_tazobactam", feedback: "Correct. C/T is optimal as it's designed to overcome these mechanisms. Cefepime alone is risky due to high bacterial load in pneumonia (inoculum effect)." } }, { caseId: '8-2', title: "Case 2: E. faecium in Blood", context: "75M with CLABSI.", organism: { name: "Enterococcus faecium", source: "Blood" }, resistance: { phenotype: { "Ampicillin": "R", "Penicillin": "R", "Vancomycin": "R", "Linezolid": "S", "Daptomycin": "S", "Ciprofloxacin": "R" } }, interpretation: { question: "What is the key phenotype?", choices: [ {id: "mrsa", text: "MRSA"}, {id: "vre", text: "Vancomycin-Resistant Enterococcus (VRE)"}, {id: "cre", text: "CRE"} ], correct: "vre", feedback: "Correct. This is VRE. Ampicillin resistance is also typical for E. faecium." }, therapy: { question: "What is the best therapy?", choices: [ { id: "vancomycin", text: "High-dose Vancomycin" }, { id: "ampicillin_sulbactam", text: "Ampicillin/Sulbactam" }, { id: "linezolid", text: "Linezolid" } ], correct: "linezolid", feedback: "Correct. Linezolid or Daptomycin are first-line for VRE bacteremia." } } ]},
             { id: 9, title: "Dialysis Patient CRBSI", description: "Managing a catheter-related bloodstream infection in an end-stage renal disease patient.", patient: { name: "Mr. Franklin", age: 62, sex: "Male", history: "ESRD on hemodialysis via tunneled catheter, diabetes.", presentation: "Presents to ED with fever and chills during his dialysis session. Looks unwell.", vitals: { temp: "39.5°C", hr: "115 bpm", bp: "100/60 mmHg", rr: "20/min", spO2: "96% on RA" } }, organism: { name: "Staphylococcus aureus", source: "Blood Culture (from catheter and peripheral)" }, resistance: { mechanism: "mecA-positive (MRSA)", phenotype: { "Oxacillin": "R", "Vancomycin": "S (MIC=1)", "Daptomycin": "S (MIC=0.5)", "Linezolid": "S", "Rifampin": "S" } }, initialActions: [{ text: "Draw blood cultures, start empiric antibiotics", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "vancomycin", text: "Vancomycin" }, { id: "cefazolin", text: "Cefazolin" }], definitiveChoices: [{ id: "continue_vancomycin", text: "Continue Vancomycin, retain catheter" }, { id: "switch_daptomycin_remove_catheter", text: "Switch to Daptomycin, remove catheter" }, { id: "continue_vancomycin_remove_catheter", text: "Continue Vancomycin, remove catheter" }], correctPath: { empiric: "vancomycin", definitive: "continue_vancomycin_remove_catheter" }, stewardshipTip: "Source control is paramount in CRBSI. For S. aureus, catheter removal is almost always necessary. Vancomycin remains a first-line agent for MRSA bacteremia.", references: ["IDSA Clinical Practice Guideline for the Diagnosis and Management of Intravascular Catheter-Related Infection."] },
             { id: 10, title: "Neutropenic Fever Puzzle", description: "A high-risk cancer patient develops fever, requiring rapid and broad antimicrobial coverage.", patient: { name: "Ms. Albright", age: 48, sex: "Female", history: "Acute Myeloid Leukemia (AML) post-induction chemotherapy.", presentation: "Day 10 post-chemo, develops fever. Absolute Neutrophil Count (ANC) is 50 cells/µL.", vitals: { temp: "38.8°C", hr: "110 bpm", bp: "105/70 mmHg", rr: "18/min", spO2: "98% on RA" } }, organism: { name: "Pseudomonas aeruginosa", source: "Blood Culture" }, resistance: { mechanism: "Multiple (efflux, AmpC)", phenotype: { "Piperacillin/Tazobactam": "R", "Ceftazidime": "R", "Cefepime": "S", "Meropenem": "S", "Ciprofloxacin": "R", "Amikacin": "S" } }, initialActions: [{ text: "Initiate empiric neutropenic fever protocol", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "cefepime", text: "Start Cefepime" }, { id: "ceftriaxone", text: "Start Ceftriaxone" }, { id: "vancomycin", text: "Start Vancomycin" }], definitiveChoices: [{ id: "continue_cefepime", text: "Continue Cefepime" }, { id: "switch_meropenem", text: "Switch to Meropenem" }, { id: "add_amikacin", text: "Add Amikacin to Cefepime" }], correctPath: { empiric: "cefepime", definitive: "continue_cefepime" }, stewardshipTip: "For high-risk neutropenic fever, an anti-pseudomonal beta-lactam like cefepime or piperacillin-tazobactam is the standard of care. Vancomycin is not routinely started unless there's a specific indication (e.g., suspected CRBSI, severe mucositis).", references: ["IDSA Clinical Practice Guideline for the Use of Antimicrobial Agents in Neutropenic Patients with Cancer."] },
             { id: 11, title: "Prosthetic Joint Infection", description: "A subtle but serious infection involving hardware, where biofilm is the main enemy.", patient: { name: "Mr. Harrison", age: 71, sex: "Male", history: "Total hip arthroplasty 2 years ago.", presentation: "6 months of worsening hip pain and a draining sinus tract over the surgical site.", vitals: { temp: "37.5°C", hr: "80 bpm", bp: "135/85 mmHg", rr: "16/min", spO2: "97% on RA" } }, organism: { name: "Staphylococcus epidermidis", source: "Multiple deep tissue cultures" }, resistance: { mechanism: "mecA-positive (methicillin-resistant)", phenotype: { "Oxacillin": "R", "Vancomycin": "S", "Linezolid": "S", "Daptomycin": "S", "Rifampin": "S" } }, initialActions: [{ text: "Patient requires surgery and antibiotics. Awaiting cultures.", action: "showCultureOnly" }], empiricChoices: [], definitiveChoices: [{ id: "vancomycin_monotherapy", text: "Vancomycin monotherapy" }, { id: "vancomycin_rifampin", text: "Vancomycin + Rifampin" }, { id: "linezolid_monotherapy", text: "Linezolid monotherapy" }], correctPath: { empiric: null, definitive: "vancomycin_rifampin" }, stewardshipTip: "Rifampin is uniquely effective at penetrating staphylococcal biofilms. For prosthetic hardware infections, it should always be used in combination with a backbone agent (like vancomycin) to prevent the rapid emergence of rifampin resistance.", references: ["IDSA Clinical Practice Guideline for the Diagnosis and Management of Prosthetic Joint Infection."] },
-            { id: 12, title: "Intra-abdominal Abscess", description: "A polymicrobial infection requiring broad coverage, especially for anaerobic bacteria.", patient: { name: "Ms. Wallace", age: 54, sex: "Female", history: "Complicated appendectomy 7 days ago.", presentation: "Develops worsening abdominal pain, fever, and leukocytosis. CT scan shows a 6cm pelvic abscess.", vitals: { temp: "38.9°C", hr: "120 bpm", bp: "110/75 mmHg", rr: "22/min", spO2: "96% on RA" } }, organism: { name: "Polymicrobial: E. coli and Bacteroides fragilis", source: "Abscess fluid" }, resistance: { mechanism: "E. coli is ESBL, B. fragilis is typical", phenotype: { "E. coli": "ESBL+", "Piperacillin/Tazobactam": "S", "Ceftriaxone": "R", "Meropenem": "S", "Ciprofloxacin": "R" } }, initialActions: [{ text: "Drain abscess and start broad empiric antibiotics", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "ceftriaxone_metronidazole", text: "Ceftriaxone + Metronidazole" }, { id: "piperacillin_tazobactam", text: "Piperacillin-Tazobactam" }, { id: "levofloxacin", text: "Levofloxacin" }], definitiveChoices: [{ id: "continue_piperacillin_tazobactam", text: "Continue Piperacillin-Tazobactam" }, { id: "switch_ertapenem", text: "Switch to Ertapenem" }], correctPath: { empiric: "piperacillin_tazobactam", definitive: "switch_ertapenem" }, stewardshipTip: "Piperacillin-tazobactam is excellent empiric therapy for mixed intra-abdominal infections. Once an ESBL is identified, a carbapenem is preferred for definitive therapy of a serious infection. Ertapenem is a good 'stewardship carbapenem' as it spares activity against Pseudomonas.", references: [] },
+            { id: 12, title: "Intra-abdominal Abscess", description: "A polymicrobial infection requiring broad coverage, especially for anaerobic bacteria.", patient: { name: "Ms. Wallace", age: 54, sex: "Female", history: "Complicated appendectomy 7 days ago.", presentation: "Develops worsening abdominal pain, fever, and leukocytosis. CT scan shows a 6cm pelvic abscess.", vitals: { temp: "38.9°C", hr: "120 bpm", bp: "110/75 mmHg", rr: "22/min", spO2: "96% on RA" } }, organism: { name: "Polymicrobial: E. coli and Bacteroides fragilis", source: "Abscess fluid" }, resistance: { mechanism: "E. coli is ESBL, B. fragilis is typical", phenotype: { "E. coli": "ESBL+", "Piperacillin/Tazobactam": "S", "Ceftriaxone": "R", "Meropenem": "S", "Ciprofloxacin": "R" } }, initialActions: [{ text: "Drain abscess and start broad empiric antibiotics", action: "startEmpiricTherapy" }], empiricChoices: [{ id: "ceftriaxone_metronidazole", text: "Ceftriaxone + Metronidazole" }, { id: "piperacillin_tazobactam", text: "Piperacillin-Tazobactam" }, { id: "levofloxacin", text: "Levofloxacin" }], definitiveChoices: [{ id: "continue_piperacillin_tazobactam", text: "Continue Piperacillin-Tazobactam" }, { id: "switch_ertapenem", text: "Switch to Ertapenem" }], correctPath: { empiric: "piperacillin_tazobactam", definitive: "switch_ertapenem" }, stewardshipTip: "Piperacillin-tazobactam is excellent empiric therapy for mixed intra-abdominal infections. Once an ESBL is identified, a carbapenem is the most reliable therapy for a serious infection. Ertapenem is a good 'stewardship carbapenem' as it spares activity against Pseudomonas.", references: [] },
             { id: 13, title: "The TB Conundrum", description: "Recognizing a classic infectious disease that requires a completely different therapeutic approach.", patient: { name: "Mr. Kim", age: 35, sex: "Male", history: "Recently emigrated from a TB-endemic country.", presentation: "2-month history of productive cough, night sweats, weight loss, and low-grade fevers.", vitals: { temp: "37.9°C", hr: "95 bpm", bp: "115/70 mmHg", rr: "18/min", spO2: "95% on RA" } }, organism: { name: "Mycobacterium tuberculosis complex", source: "Sputum AFB smear/NAAT" }, resistance: { mechanism: "N/A (drug-susceptible)", phenotype: { "Isoniazid": "S", "Rifampin": "S", "Pyrazinamide": "S", "Ethambutol": "S" } }, initialActions: [{ text: "Patient has classic TB symptoms. Place in isolation and get diagnostics.", action: "showCultureOnly" }], empiricChoices: [], definitiveChoices: [{ id: "start_ripe", text: "Start 4-drug therapy (RIPE: Rifampin, Isoniazid, Pyrazinamide, Ethambutol)" }, { id: "start_rifampin", text: "Start Rifampin monotherapy" }, { id: "start_levofloxacin", text: "Start Levofloxacin for community-acquired pneumonia" }], correctPath: { empiric: null, definitive: "start_ripe" }, stewardshipTip: "Treating active tuberculosis with a single agent is a critical error that rapidly selects for drug resistance. Multi-drug combination therapy (RIPE) is the absolute standard of care to ensure cure and prevent transmission of resistant TB.", references: ["CDC Guidelines for the Treatment of Drug-Susceptible Tuberculosis."] }
         ];
 
@@ -318,12 +356,12 @@
 
         // --- UI & ANIMATION LOGIC ---
         function switchView(viewToShow) {
+            // Reset scroll position to the top of the page when changing views.
+            window.scrollTo(0, 0);
+            
             [scenarioSelectionScreen, simulationScreen, summaryScreen].forEach(view => {
-                if (view.id === viewToShow) {
-                    view.classList.remove('view-hidden');
-                } else {
-                    view.classList.add('view-hidden');
-                }
+                const isTarget = view.id === viewToShow;
+                view.classList.toggle('view-hidden', !isTarget);
             });
         }
         
@@ -433,11 +471,14 @@
             reportsContent.innerHTML = reportHtml;
         }
 
+        function createGoogleSearchLink(query) {
+            return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        }
+
         function renderSummaryScreen() {
             summaryContent.innerHTML = `
                 <p class="text-lg text-gray-600 mb-8">This guide summarizes the key resistance mechanisms and treatment principles covered in the simulation. Use it to reinforce your learning and as a quick reference for clinical decision-making.</p>
-
-                <!-- ANTIMICROBIAL STEWARDSHIP -->
+                
                 <h3>Core Principles of Antimicrobial Stewardship</h3>
                 <ul>
                     <li><strong>Source Control:</strong> Always address the root cause of infection. Drain abscesses, remove infected lines/hardware. Antibiotics alone may fail without it.</li>
@@ -446,113 +487,74 @@
                     <li><strong>Use Oral Agents When Possible:</strong> For stable patients with infections where oral agents have good bioavailability (e.g., uncomplicated cystitis), switch from IV to PO.</li>
                 </ul>
 
-                <!-- GRAM POSITIVE -->
-                <h3>Gram-Positive Resistance</h3>
-                <h4>Methicillin-Resistant Staphylococcus aureus (MRSA)</h4>
-                <p>Identified by resistance to <code>Oxacillin</code> or <code>Cefoxitin</code>. This is mediated by the <code>mecA</code> gene.</p>
+                <h3>Major Mechanisms of Resistance</h3>
+                <p>Bacteria evolve resistance through several key pathways:</p>
                 <ul>
-                    <li><strong>Preferred Agents:</strong> Vancomycin, Daptomycin, Linezolid.</li>
-                    <li><strong>Vancomycin MIC Creep:</strong> For serious infections (bacteremia, endocarditis, osteomyelitis), if the Vancomycin MIC is 2 µg/mL, consider alternative agents like Daptomycin or Linezolid due to risk of clinical failure.</li>
-                    <li><strong>Prosthetic/Biofilm Infections:</strong> Always use combination therapy with <strong>Rifampin</strong> to penetrate the biofilm (e.g., <code>Vancomycin + Rifampin</code>). Never use Rifampin alone.</li>
-                </ul>
-                <h4>Vancomycin-Resistant Enterococcus (VRE)</h4>
-                <p>Most common in <em>E. faecium</em>, which is also intrinsically resistant to ampicillin.</p>
-                <ul>
-                    <li><strong>Preferred Agents:</strong> Linezolid, Daptomycin.</li>
-                    <li><strong>Synergy for Endocarditis:</strong> If treating endocarditis, synergy with an aminoglycoside is needed. You must check for <strong>High-Level Aminoglycoside Resistance (HLAR)</strong>. If HL-Gentamicin is 'R', you cannot use it for synergy.</li>
+                    <li><strong>1. Alter Target Site:</strong> The antibiotic can no longer bind to its target.
+                        <ul>
+                            <li>Ex: MRSA imports a new Penicillin-Binding Protein (PBP), <code>mecA</code>, that doesn't bind beta-lactams.</li>
+                            <li>Ex: Penicillin-resistant <em>S. pneumoniae</em> creates a 'mosaic PBP' by inserting DNA from other bacteria.</li>
+                            <li>Ex: VRE alters its cell wall precursor from <code>D-Ala-D-Ala</code> to <code>D-Ala-D-Lac</code>, so vancomycin can't bind.</li>
+                            <li>Ex: Fluoroquinolone resistance arises from mutations in target enzymes <code>DNA gyrase</code> and <code>topoisomerase IV</code>.</li>
+                        </ul>
+                    </li>
+                    <li><strong>2. Destroy the Antibiotic:</strong> The bacteria produces an enzyme that inactivates the drug.
+                        <ul>
+                            <li>The most common example is <strong>β-lactamase production</strong>, which breaks the beta-lactam ring. This can be simple (e.g., Penicillinase in <em>S. aureus</em>) or complex (e.g., ESBLs, AmpC, Carbapenemases).</li>
+                        </ul>
+                    </li>
+                    <li><strong>3. Decrease Intracellular Concentration:</strong> The bacteria prevents the antibiotic from reaching its target.
+                        <ul>
+                            <li><strong>Efflux Pumps:</strong> Actively pump the antibiotic out of the cell (e.g., resistance to tetracyclines, macrolides).</li>
+                            <li><strong>Porin Loss:</strong> The bacteria closes channels in its outer membrane, preventing entry (a common mechanism in <em>Pseudomonas</em> resistance to carbapenems).</li>
+                        </ul>
+                    </li>
                 </ul>
 
-                <!-- GRAM NEGATIVE -->
+                <h3>Gram-Positive Resistance</h3>
+                <h4>Methicillin-Resistant Staphylococcus aureus (MRSA)</h4>
+                <p>Identified by resistance to <code>Oxacillin</code>. Mediated by the <code>mecA</code> gene, which is an example of <strong>importing a new, low-affinity PBP (PBP2a)</strong>.</p>
+                <ul>
+                    <li><strong>VISA/hVISA:</strong> Vancomycin-intermediate strains (MIC 4-8) or heteroresistant strains (MIC 1-2 with risk of failure) have a <strong>thicker cell wall with "decoy" D-Ala-D-Ala targets</strong> that trap vancomycin. For serious infections, consider agents like Daptomycin or Linezolid.</li>
+                    <li><strong>Prosthetic/Biofilm Infections:</strong> Always use combination therapy with <strong>Rifampin</strong> to penetrate the biofilm (e.g., <code>Vancomycin + Rifampin</code>). Rifampicin resistance occurs via mutation in the <code>RNA polymerase</code> gene.</li>
+                </ul>
+                <h4>Vancomycin-Resistant Enterococcus (VRE)</h4>
+                <p>Resistance is due to altering the peptidoglycan precursor to <code>D-Ala-D-Lac</code>. Most common in <em>E. faecium</em>.</p>
+                <ul>
+                    <li><strong>Daptomycin Resistance:</strong> Can occur via <strong>electrostatic repulsion</strong> due to changes in the cell-surface charge, preventing daptomycin binding.</li>
+                </ul>
+
                 <h3>Gram-Negative Resistance</h3>
                 <h4>Extended-Spectrum β-Lactamases (ESBLs)</h4>
-                <p>Identified by resistance to 3rd-gen cephalosporins (e.g., <code>Ceftriaxone</code>) but susceptibility to carbapenems.</p>
+                <p>Results from mutations in the structural genes of simple beta-lactamases (like TEM, SHV) that expand their activity to include 3rd-gen cephalosporins.</p>
                 <ul>
-                    <li><strong>Serious Infections (Bacteremia, Sepsis):</strong> Carbapenems (e.g., <code>Meropenem</code>, <code>Ertapenem</code>) are the drugs of choice.</li>
-                    <li><strong>The Inoculum Effect:</strong> Be cautious using <code>Piperacillin-Tazobactam</code> for serious ESBL infections, even if it reports as 'S'. The high bacterial load can overwhelm the drug, leading to failure.</li>
-                    <li><strong>Uncomplicated Cystitis (Stewardship):</strong> Use oral options like <code>Nitrofurantoin</code> or <code>Fosfomycin</code> to spare carbapenems.</li>
+                    <li><strong>Serious Infections:</strong> Carbapenems are the drugs of choice.</li>
+                    <li><strong>Uncomplicated Cystitis:</strong> Use oral options like <code>Nitrofurantoin</code> or <code>Fosfomycin</code> to spare carbapenems.</li>
                 </ul>
 
                 <h4>Inducible AmpC β-Lactamases</h4>
-                <p>Associated with <strong>SPICE-M</strong> organisms (<em>Serratia, Providencia, Indole-positive Proteae, Citrobacter, Enterobacter, Morganella</em>).</p>
+                <p>Associated with <strong>SPICE-M</strong> organisms. Resistance occurs via <strong>deregulation of B-lactamase production</strong>, often from mutations in regulator genes like <code>ampD</code>.</p>
                 <ul>
-                    <li><strong>The AmpC Trap:</strong> These organisms may test susceptible to 3rd-gen cephalosporins (e.g., <code>Ceftriaxone</code>), but can become resistant during therapy. <strong>Do not use them.</strong></li>
-                    <li><strong>Preferred Agents:</strong> <code>Cefepime</code> (more stable) or a <code>Carbapenem</code>.</li>
+                    <li><strong>The AmpC Trap:</strong> Do not use 3rd-gen cephalosporins, even if they report as 'S'.</li>
+                    <li><strong>Preferred Agents:</strong> <code>Cefepime</code> or a <code>Carbapenem</code>.</li>
                 </ul>
 
                 <h4>Carbapenem-Resistant Enterobacterales (CRE)</h4>
                 <p>Identified by resistance to one or more carbapenems. The mechanism is critical for choosing therapy.</p>
                 <ul>
-                    <li><strong>KPC (Klebsiella pneumoniae carbapenemase):</strong> Susceptible to newer BL/BLIs like <code>Ceftazidime-Avibactam</code> and <code>Meropenem-Vaborbactam</code>.</li>
-                    <li><strong>MBLs - Metallo-β-Lactamases (e.g., NDM, VIM):</strong> Resistant to almost all β-lactams/BL-inhibitors. Require novel agents like <code>Cefiderocol</code> or combination therapy such as <code>Ceftazidime-Avibactam + Aztreonam</code>.</li>
-                    <li><strong>OXA-48-like:</strong> Often retain susceptibility to <code>Ceftazidime-Avibactam</code> but are resistant to Meropenem-Vaborbactam.</li>
+                    <li><strong>KPC:</strong> Serine carbapenemase. Use <code>Ceftazidime-Avibactam</code>, <code>Meropenem-Vaborbactam</code>.</li>
+                    <li><strong>MBLs (NDM, VIM):</strong> Metallo-β-lactamases. Use <code>Cefiderocol</code> or <code>Ceftazidime-Avibactam + Aztreonam</code>.</li>
+                     <li><strong>OXA-48-like:</strong> Serine carbapenemase with weak activity. Use <code>Ceftazidime-Avibactam</code>.</li>
                 </ul>
 
-                <h4>Difficult Non-fermenters</h4>
+                <h3>Key Guidelines & References</h3>
                 <ul>
-                    <li><strong>MDR Pseudomonas aeruginosa:</strong> Therapy is guided by susceptibilities. Agents like <code>Ceftolozane-Tazobactam</code> or <code>Ceftazidime-Avibactam</code> are often effective.</li>
-                    <li><strong>Acinetobacter baumannii (CRAB):</strong> Often requires combination therapy. Options include high-dose ampicillin-sulbactam, polymyxins (colistin), or tetracyclines (minocycline, tigecycline).</li>
-                    <li><strong>Stenotrophomonas maltophilia:</strong> Intrinsically resistant to carbapenems. Drug of choice is <code>TMP-SMX</code>.</li>
+                    <li><a href="${createGoogleSearchLink("IDSA Clinical Practice Guideline for the Diagnosis and Management of Intravascular Catheter-Related Infection")}" target="_blank" rel="noopener noreferrer">IDSA Guideline: Catheter-Related Infections</a></li>
+                    <li><a href="${createGoogleSearchLink("IDSA Clinical Practice Guideline for the Use of Antimicrobial Agents in Neutropenic Patients with Cancer")}" target="_blank" rel="noopener noreferrer">IDSA Guideline: Antimicrobial Use in Neutropenic Cancer Patients</a></li>
+                    <li><a href="${createGoogleSearchLink("IDSA Clinical Practice Guideline for the Diagnosis and Management of Prosthetic Joint Infection")}" target="_blank" rel="noopener noreferrer">IDSA Guideline: Prosthetic Joint Infections</a></li>
+                    <li><a href="${createGoogleSearchLink("CDC Guidelines for the Treatment of Drug-Susceptible Tuberculosis")}" target="_blank" rel="noopener noreferrer">CDC Guideline: Treatment of Drug-Susceptible TB</a></li>
+                    <li><a href="${createGoogleSearchLink("CLSI M100 Performance Standards for Antimicrobial Susceptibility Testing")}" target="_blank" rel="noopener noreferrer">CLSI M100 Performance Standards</a></li>
                 </ul>
-                
-                <!-- FLOWCHART -->
-                <h3>Treatment Decision Flowchart</h3>
-                <div class="overflow-x-auto p-4 bg-gray-50 rounded-lg">
-                    <div class="flowchart min-w-[800px]">
-                        <!-- Gram-Positive Column -->
-                        <div class="flowchart-col">
-                            <div class="flow-box decision"><h4>Gram-Positive Cocci</h4></div>
-                            <div class="flow-arrow down"></div>
-                            <div class="flow-box decision"><h4>Staphylococcus or Enterococcus?</h4></div>
-                            
-                            <!-- Staph Branch -->
-                            <div class="flow-arrow down"></div>
-                            <div class="flow-box decision"><h4>Staph: Oxacillin Susceptible?</h4></div>
-                            <div class="flex gap-4">
-                                <div class="flowchart-col">
-                                    <div class="flow-arrow down"></div>
-                                    <div class="flow-box endpoint"><h4>MSSA</h4><p>Use Cefazolin, Nafcillin, or Dicloxacillin</p></div>
-                                </div>
-                                <div class="flowchart-col">
-                                    <div class="flow-arrow down"></div>
-                                    <div class="flow-box endpoint"><h4>MRSA</h4><p>Use Vancomycin, Linezolid, or Daptomycin</p></div>
-                                    <div class="flow-arrow down"></div>
-                                    <div class="flow-box warning"><h4>Biofilm / PJI?</h4><p>Add Rifampin</p></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Gram-Negative Column -->
-                        <div class="flowchart-col flex-shrink-0">
-                            <div class="flow-box decision"><h4>Gram-Negative Rod</h4></div>
-                            <div class="flow-arrow down"></div>
-                            <div class="flow-box decision"><h4>Resistant to Ceftriaxone? (ESBL/AmpC Screen)</h4></div>
-                             <div class="flex gap-4">
-                                <!-- No Branch (Simple) -->
-                                <div class="flowchart-col">
-                                    <div class="flow-arrow down"></div>
-                                    <div class="flow-box endpoint"><h4>NO</h4><p>Use Ceftriaxone (unless SPICE-M organism)</p></div>
-                                </div>
-                                <!-- Yes Branch (Complex) -->
-                                <div class="flowchart-col">
-                                    <div class="flow-arrow down"></div>
-                                    <div class="flow-box decision"><h4>YES. Carbapenem Susceptible?</h4></div>
-                                    <div class="flex gap-4">
-                                        <div class="flowchart-col">
-                                            <div class="flow-arrow down"></div>
-                                            <div class="flow-box endpoint"><h4>YES (ESBL)</h4><p>Use Carbapenem for serious infection. Consider P/T or oral for UTI.</p></div>
-                                        </div>
-                                        <div class="flowchart-col">
-                                            <div class="flow-arrow down"></div>
-                                            <div class="flow-box warning"><h4>NO (CRE)</h4><p>Test for mechanism!</p></div>
-                                            <div class="flow-arrow down"></div>
-                                            <div class="flow-box endpoint"><h4>KPC: CZA, M-V<br>MBL: Cefiderocol, CZA+Azt<br>OXA-48: CZA</h4></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             `;
             switchView('summary-screen');
         }
@@ -577,7 +579,9 @@
             reportsContent.innerHTML = '<p class="text-gray-500">Awaiting specimen collection...</p>';
             
             if (currentScenario.stewardshipTip) {
-                stewardshipTip.innerHTML = currentScenario.stewardshipTip;
+                const query = currentScenario.references[0] || currentScenario.stewardshipTip;
+                const link = createGoogleSearchLink(query);
+                stewardshipTip.innerHTML = `${currentScenario.stewardshipTip} <a href="${link}" target="_blank" rel="noopener noreferrer" class="underline">(Learn more)</a>`;
                 stewardshipPanel.classList.remove('hidden');
             } else {
                 stewardshipPanel.classList.add('hidden');
@@ -592,6 +596,9 @@
             const choiceId = target.dataset.choiceId;
 
             switch(action) {
+                case 'reset':
+                    resetSimulation();
+                    break;
                 case 'startEmpiricTherapy':
                     if (currentScenario.id === 7) { // AmpC trap
                          addFeedback("Patient started on Ceftriaxone for HAP. Cultures pending.", "info");
@@ -621,15 +628,116 @@
                 case 'selectDefinitive':
                     handleDefinitiveChoice(choiceId, target.textContent);
                     break;
+                
+                // --- Challenge-specific actions ---
+                case 'startChallenge':
+                    startChallenge();
+                    break;
+                
+                case 'selectChallengeCase':
+                    loadChallengeCase(choiceId);
+                    break;
+                
+                case 'selectInterpretation':
+                    handleInterpretationChoice(choiceId);
+                    break;
             }
         }
-        
+
+        // --- CHALLENGE MODE FUNCTIONS ---
+        function startChallenge() {
+            renderChallengeCaseList();
+        }
+
+        function renderChallengeCaseList() {
+            window.scrollTo(0, 0);
+            feedbackPanel.innerHTML = '';
+            reportsContent.innerHTML = '<p class="text-gray-500">Select a case.</p>';
+            patientPresentation.innerHTML = `
+                <h3 class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    Antibiogram Challenge
+                </h3>
+                <p>Please select a case from the collapsible menu below to begin.</p>
+            `;
+            const caseButtons = currentScenario.cases.map(c => 
+                `<button class="btn-choice" data-action="selectChallengeCase" data-choice-id="${c.caseId}">${c.title}</button>`
+            ).join('');
+            
+            actionsPanel.innerHTML = `
+                <details open>
+                    <summary class="btn btn-primary w-full text-center block">
+                        View Challenge Cases (${currentScenario.cases.length} available)
+                    </summary>
+                    <div class="mt-4 space-y-3">
+                        ${caseButtons}
+                    </div>
+                </details>
+            `;
+        }
+
+        function loadChallengeCase(caseId) {
+            const caseData = currentScenario.cases.find(c => c.caseId === caseId);
+            if (!caseData) return;
+
+            window.scrollTo(0, 0); // Ensure view is at the top for each case
+            feedbackPanel.innerHTML = ''; // Clear feedback for new case
+            currentChallengeCase = caseData;
+            
+            patientPresentation.innerHTML = `
+                <h3 class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    Challenge: ${currentChallengeCase.title}
+                </h3>
+                <p><strong>Context:</strong> ${currentChallengeCase.context}</p>
+            `;
+            renderCultureReport(true, currentChallengeCase);
+            renderChallengeInterpretation();
+        }
+
+        function renderChallengeInterpretation() {
+            const { interpretation } = currentChallengeCase;
+            actionsPanel.innerHTML = `
+                <h3>Step 1: Interpretation</h3>
+                <p class="text-sm text-gray-500 my-2">${interpretation.question}</p>
+                <div class="space-y-3 mt-4">
+                     ${interpretation.choices.map(choice => `
+                        <button class="btn-choice" data-action="selectInterpretation" data-choice-id="${choice.id}">${choice.text}</button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function handleInterpretationChoice(choiceId) {
+            const { interpretation } = currentChallengeCase;
+            const isCorrect = choiceId === interpretation.correct;
+            addFeedback(interpretation.feedback, isCorrect ? 'correct' : 'info');
+            renderDefinitiveChoices(true); // true -> isChallenge
+        }
+
         function handleDefinitiveChoice(choiceId, choiceText) {
+            // Handle challenge mode separately
+            if (currentScenario.isChallenge) {
+                const { therapy } = currentChallengeCase;
+                const isCorrect = choiceId === therapy.correct;
+                addFeedback(therapy.feedback, isCorrect ? 'correct' : 'incorrect');
+
+                actionsPanel.innerHTML = `
+                    <h3>Case Complete</h3>
+                    <p class="my-4">You can now return to the list to select another challenge case or go back to the main menu.</p>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                        <button class="btn btn-primary w-full" data-action="startChallenge">Back to Challenge List</button>
+                        <button class="btn btn-secondary w-full" data-action="reset">Main Menu</button>
+                    </div>
+                `;
+                return; 
+            }
+
+            // Regular scenario logic
             const correctPath = currentScenario.correctPath ? currentScenario.correctPath.definitive : null;
             const isCorrect = Array.isArray(correctPath) ? correctPath.includes(choiceId) : choiceId === correctPath;
 
             let feedback = getScenarioFeedback(isCorrect, choiceId, choiceText);
-            
             addFeedback(feedback, isCorrect ? 'correct' : 'incorrect');
             
             if (currentScenario.stewardshipTip) stewardshipPanel.classList.remove('hidden');
@@ -637,17 +745,17 @@
             actionsPanel.innerHTML = `
                 <h3>Scenario Complete</h3>
                 <div class="flex flex-col sm:flex-row gap-3 mt-4">
-                    <button id="next-scenario-btn" class="btn btn-primary w-full">Back to Main Menu</button>
+                    <button class="btn btn-primary w-full" data-action="reset">Back to Main Menu</button>
                     <button id="go-to-summary-btn" class="btn btn-secondary w-full">Review Learning Summary</button>
                 </div>
             `;
-            document.getElementById('next-scenario-btn').addEventListener('click', resetSimulation);
             document.getElementById('go-to-summary-btn').addEventListener('click', renderSummaryScreen);
         }
         
         function getScenarioFeedback(isCorrect, choiceId, choiceText) {
             if (isCorrect) return `<strong>Correct.</strong> Your choice of ${choiceText} is the optimal therapeutic path.`;
             
+            // This feedback is for regular scenarios, not the challenge mode
             switch(currentScenario.id) {
                 case 1: return `<strong>Incorrect.</strong> For ESBL cystitis, a carbapenem is overkill, and other agents are resisted. Nitrofurantoin is the best stewardship choice.`;
                 case 2: return `<strong>Incorrect.</strong> KPC enzymes require a targeted inhibitor like avibactam or vaborbactam. Colistin is a toxic, older option.`;
@@ -682,4 +790,3 @@
     </script>
 </body>
 </html>
-
